@@ -1,18 +1,16 @@
-CourseName, CourseCode, Hours, Instructor
-Introduction to Programming, CS101, 30, Dr. John
-Data Structures, CS102, 40, Dr. Smith
-Algorithms, CS103, 45, Dr. Alice
-Database Management, CS104, 35, Dr. Bob
-Operating Systems, CS105, 50, Dr. Emily
-Computer Networks, CS106, 40, Dr. Michael
-Software Engineering, CS107, 45, Dr. Sarah
-Discrete Mathematics, CS108, 30, Dr. Richard
-Theory of Computation, CS109, 40, Dr. James
-Artificial Intelligence, CS110, 50, Dr. Karen
-Machine Learning, CS111, 45, Dr. David
-Computer Graphics, CS112, 40, Dr. Laura
-Cyber Security, CS113, 35, Dr. Steven
-Web Development, CS114, 30, Dr. Rachel
-Mobile App Development, CS115, 40, Dr. Lily
-
-
+CourseName,CourseCode,Hours,Instructor
+Introduction to Programming,CS101,30,Dr. John
+Data Structures,CS102,40,Dr. Smith
+Algorithms,CS103,45,Dr. Alice
+Database Management,CS104,35,Dr. Bob
+Operating Systems,CS105,50,Dr. Emily
+Computer Networks,CS106,40,Dr. Michael
+Software Engineering,CS107,45,Dr. Sarah
+Discrete Mathematics,CS108,30,Dr. Richard
+Theory of Computation,CS109,40,Dr. James
+Artificial Intelligence,CS110,50,Dr. Karen
+Machine Learning,CS111,45,Dr. David
+Computer Graphics,CS112,40,Dr. Laura
+Cyber Security,CS113,35,Dr. Steven
+Web Development,CS114,30,Dr. Rachel
+Mobile App Development,CS115,40,Dr. Lily
