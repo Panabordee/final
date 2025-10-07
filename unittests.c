@@ -1,6 +1,4 @@
 #include "unittests.h"
-
-// Helper function to simulate adding (in-memory)
 int simulate_add(Course new_course, Course courses[], int current_count) {
     for (int i = 0; i < current_count; i++) {
         if (stricmp(courses[i].code, new_course.code) == 0) {
@@ -9,9 +7,7 @@ int simulate_add(Course new_course, Course courses[], int current_count) {
     }
     courses[current_count] = new_course;
     return current_count + 1;
-}
 
-// Helper function to simulate finding (in-memory)
 int simulate_find(const char* code, Course courses[], int current_count) {
     char search_code[20];
     strcpy(search_code, code);
@@ -27,7 +23,7 @@ int simulate_find(const char* code, Course courses[], int current_count) {
     return -1;
 }
 
-// Main unit test runner function
+
 void run_unit_tests() {
     printHeader("UNIT TEST SUITE");
     printf("\n   Running in-memory logic tests...\n\n");
@@ -36,9 +32,9 @@ void run_unit_tests() {
     int n = 0;
     int all_tests_passed = 1;
 
-    // --- Test 1: Add single course ---
+
     printf("   [TEST 1] ADD: Adding a single valid course...");
-    Sleep(500); // Wait for 0.5 seconds
+    Sleep(500); 
     Course course1 = {"CS101", "Algorithms", "Alice", 40};
     n = simulate_add(course1, test_courses, n);
     if (n == 1 && strcmp(test_courses[0].code, "CS101") == 0) {
@@ -48,9 +44,8 @@ void run_unit_tests() {
     }
     setConsoleColor(C_TEXT_DEFAULT);
 
-    // --- Test 2: Add another course ---
     printf("   [TEST 2] ADD: Adding a second course...");
-    Sleep(500); // Wait for 0.5 seconds
+    Sleep(500);
     Course course2 = {"CS102", "Databases", "Bob", 35};
     n = simulate_add(course2, test_courses, n);
     if (n == 2 && strcmp(test_courses[1].code, "CS102") == 0) {
@@ -60,9 +55,9 @@ void run_unit_tests() {
     }
     setConsoleColor(C_TEXT_DEFAULT);
 
-    // --- Test 3: Prevent duplicate ---
+    
     printf("   [TEST 3] ADD: Attempting to add a duplicate (CS101)...");
-    Sleep(500); // Wait for 0.5 seconds
+    Sleep(500); 
     Course course_dup = {"CS101", "Duplicate Test", "Charlie", 30};
     int original_n = n;
     n = simulate_add(course_dup, test_courses, n);
@@ -73,9 +68,9 @@ void run_unit_tests() {
     }
     setConsoleColor(C_TEXT_DEFAULT);
 
-    // --- Test 4: Find existing course ---
+
     printf("   [TEST 4] FIND: Searching for an existing course (CS102)...");
-    Sleep(500); // Wait for 0.5 seconds
+    Sleep(500); 
     int found_index = simulate_find("CS102", test_courses, n);
     if (found_index == 1) {
         setConsoleColor(C_SUCCESS); printf(" PASS\n");
@@ -84,9 +79,8 @@ void run_unit_tests() {
     }
     setConsoleColor(C_TEXT_DEFAULT);
 
-    // --- Test 5: Find existing course (case-insensitive) ---
     printf("   [TEST 5] FIND: Searching with different casing (cs101)...");
-    Sleep(500); // Wait for 0.5 seconds
+    Sleep(500); 
     found_index = simulate_find("cs101", test_courses, n);
     if (found_index == 0) {
         setConsoleColor(C_SUCCESS); printf(" PASS\n");
@@ -95,9 +89,9 @@ void run_unit_tests() {
     }
     setConsoleColor(C_TEXT_DEFAULT);
     
-    // --- Test 6: Find non-existent course ---
+
     printf("   [TEST 6] FIND: Searching for a non-existent course (CS999)...");
-    Sleep(500); // Wait for 0.5 seconds
+    Sleep(500); 
     found_index = simulate_find("CS999", test_courses, n);
     if (found_index == -1) {
         setConsoleColor(C_SUCCESS); printf(" PASS\n");
@@ -106,7 +100,7 @@ void run_unit_tests() {
     }
     setConsoleColor(C_TEXT_DEFAULT);
 
-    // --- Final Summary ---
+    
     printf("\n----------------------------------------\n");
     if (all_tests_passed) {
         setConsoleColor(C_SUCCESS);
@@ -118,4 +112,5 @@ void run_unit_tests() {
     setConsoleColor(C_TEXT_DEFAULT);
     printf("----------------------------------------\n\n");
     printf("   Unit tests complete.\n");
+
 }
