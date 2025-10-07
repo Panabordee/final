@@ -1,41 +1,10 @@
-#include <stdio.h>
-#include <string.h>
-#include <windows.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <conio.h>
-
-#define C_BORDER 9
-#define C_HEADER 11
-#define C_TEXT_DEFAULT 15
-#define C_TEXT_ALT 7
-#define C_SUCCESS 10
-#define C_WARNING 14
-#define C_PROMPT 11
-
-typedef struct {
-    char code[20], name[100], teacher[100];
-    int hours;
-} Course;
-
-void getCSVPath(char *path, size_t size);
-int load(Course cs[]);
-void save(Course cs[], int n);
-void showAllPage(Course cs[], int n);
-void addPage(Course cs[], int *n);
-void searchPage(Course cs[], int n);
-void updatePage(Course cs[], int n);
-void deletePage(Course cs[], int *n);
-void displayCourseTable(Course cs[], int n, const char* filter);
-void setConsoleColor(WORD color);
-void showMenu();
-void printHeader(const char* title);
-void pauseForUser(const char* message);
-char* strlwr(char* s);
+#include "course.h"
+#include "unittests.h"
+#include "e2etests.h"
 
 int main() {
     Course cs[100];
-    int n = load(cs);
+    int n = load_courses(NULL, cs); // Use load_courses for consistency
     char input[20];
 
     do {
@@ -51,9 +20,10 @@ int main() {
                 case 3: searchPage(cs, n); break;
                 case 4: updatePage(cs, n); break;
                 case 5: deletePage(cs, &n); break;
+                case 6: showTestPage(); break;
                 default:
                     setConsoleColor(C_WARNING);
-                    printf("\n   Invalid choice. Please enter a number from 1-5.");
+                    printf("\n   Invalid choice.");
                     pauseForUser("\n   Press any key to try again...");
                     break;
             }
@@ -61,389 +31,19 @@ int main() {
             break;
         } else {
             setConsoleColor(C_WARNING);
-            printf("\n   Invalid command. Please enter a number or 'exit'.");
+            printf("\n   Invalid command.");
             pauseForUser("\n   Press any key to try again...");
         }
     } while (1);
 
-    printf("\n");
     setConsoleColor(C_SUCCESS);
-    printf("   Program exited. Goodbye!\n");
+    printf("\n   Program exited. Goodbye!\n");
     setConsoleColor(C_TEXT_DEFAULT);
     return 0;
 }
 
-void showAllPage(Course cs[], int n) {
-    char filter[100] = "";
-    while (1) {
-        system("cls");
-        printHeader("All Courses (Live Search)");
-        if (stricmp(filter, "") != 0) {
-            setConsoleColor(C_TEXT_ALT);
-            printf("   Current filter: '%s'\n", filter);
-        }
-        
-        displayCourseTable(cs, n, filter);
-
-        setConsoleColor(C_PROMPT);
-        printf("\n   >> Type to filter list, or type 'back' to return to menu: ");
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf(" %[^\n]", filter);
-
-        if (stricmp(filter, "back") == 0) break;
-    }
-}
-
-void addPage(Course cs[], int *n) {
-    char name[100], code[20], teacher[100];
-    int hours, duplicate;
-
-    while(1) {
-        system("cls");
-        printHeader("Add New Course");
-        displayCourseTable(cs, *n, "");
-        
-        setConsoleColor(C_PROMPT);
-        printf("\n   Enter New Course Name (or type 'back' to return to menu)\n   >> ");
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf(" %[^\n]", name);
-        if (stricmp(name, "back") == 0) break;
-
-        duplicate = 0;
-        for (int i = 0; i < *n; i++) {
-            if (!stricmp(cs[i].name, name)) {
-                setConsoleColor(C_WARNING);
-                printf("\n   Warning: A course with this name already exists.");
-                pauseForUser("\n   Press any key to try again...");
-                duplicate = 1;
-                break;
-            }
-        }
-        if (duplicate) continue;
-
-        setConsoleColor(C_PROMPT);
-        printf("   Enter Course Code for '%s' (or 'back' to cancel)\n   >> ", name);
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf("%s", code);
-        if (stricmp(code, "back") == 0) continue;
-
-        for (int i = 0; i < *n; i++) {
-            if (!stricmp(cs[i].code, code)) {
-                setConsoleColor(C_WARNING);
-                printf("\n   Warning: A course with this code already exists.");
-                pauseForUser("\n   Press any key to try again...");
-                duplicate = 1;
-                break;
-            }
-        }
-        if (duplicate) continue;
-
-        setConsoleColor(C_PROMPT);
-        printf("   Enter Credit Hours >> ");
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf("%d", &hours);
-
-        setConsoleColor(C_PROMPT);
-        printf("   Enter Instructor Name >> ");
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf(" %[^\n]", teacher);
-
-        strcpy(cs[*n].name, name);
-        strcpy(cs[*n].code, code);
-        strcpy(cs[*n].teacher, teacher);
-        cs[*n].hours = hours;
-        (*n)++;
-        save(cs, *n);
-
-        setConsoleColor(C_SUCCESS);
-        printf("\n   SUCCESS: Course '%s' has been added.", name);
-        pauseForUser("\n   Press any key to add another course...");
-    }
-}
-
-void searchPage(Course cs[], int n) {
-    char key[100];
-    system("cls");
-    printHeader("Search Courses");
-    displayCourseTable(cs, n, "");
-    
-    setConsoleColor(C_PROMPT);
-    printf("\n   Enter search term (name or code), or 'back' to return\n   >> ");
-    setConsoleColor(C_TEXT_DEFAULT);
-    scanf(" %[^\n]", key);
-
-    if (stricmp(key, "back") != 0) {
-        printf("\n   --- Search Results ---\n");
-        displayCourseTable(cs, n, key);
-        pauseForUser("\n   Press any key to return to main menu...");
-    }
-}
-
-void updatePage(Course cs[], int n) {
-    char code[20], input[100], confirm[10];
-    int original_hours;
-    char original_teacher[100];
-    
-    while(1) {
-        system("cls");
-        printHeader("Edit Course Information");
-        displayCourseTable(cs, n, "");
-
-        setConsoleColor(C_PROMPT);
-        printf("\n   Enter the CODE of the course to edit (or 'back' to return)\n   >> ");
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf("%s", code);
-        if (stricmp(code, "back") == 0) break;
-
-        int found_idx = -1;
-        for (int i = 0; i < n; i++) {
-            if (!stricmp(cs[i].code, code)) {
-                found_idx = i;
-                break;
-            }
-        }
-
-        if (found_idx == -1) {
-            setConsoleColor(C_WARNING);
-            printf("\n   Warning: Course with code '%s' not found.", code);
-            pauseForUser("\n   Press any key to try again...");
-            continue;
-        }
-
-        setConsoleColor(C_TEXT_ALT);
-        printf("\n   Editing Course: ");
-        setConsoleColor(C_TEXT_DEFAULT);
-        printf("%s (%s)\n", cs[found_idx].name, cs[found_idx].code);
-        
-        original_hours = cs[found_idx].hours;
-        strcpy(original_teacher, cs[found_idx].teacher);
-
-        int new_hours = original_hours;
-        char new_teacher[100];
-        strcpy(new_teacher, original_teacher);
-
-        setConsoleColor(C_PROMPT);
-        printf("   Enter new credit hours (current: %d) or press Enter to skip\n   >> ", original_hours);
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf(" %[^\n]", input);
-        if (strlen(input) > 0) new_hours = atoi(input);
-
-        setConsoleColor(C_PROMPT);
-        printf("   Enter new instructor (current: %s) or press Enter to skip\n   >> ", original_teacher);
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf(" %[^\n]", input);
-        if (strlen(input) > 0) strcpy(new_teacher, input);
-
-        if (new_hours == original_hours && strcmp(new_teacher, original_teacher) == 0) {
-            setConsoleColor(C_TEXT_ALT);
-            printf("\n   No changes were made.");
-            pauseForUser("\n   Press any key to continue...");
-            continue;
-        }
-
-        setConsoleColor(C_WARNING);
-        printf("\n   Please confirm changes for %s:\n", cs[found_idx].code);
-        printf("   Hours: %d -> %d\n", original_hours, new_hours);
-        printf("   Instructor: '%s' -> '%s'\n", original_teacher, new_teacher);
-        printf("   Save these changes? (yes or no): ");
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf("%s", confirm);
-
-        if (stricmp(confirm, "yes") == 0) {
-            cs[found_idx].hours = new_hours;
-            strcpy(cs[found_idx].teacher, new_teacher);
-            save(cs, n);
-            setConsoleColor(C_SUCCESS);
-            printf("\n   SUCCESS: Course '%s' has been updated.", cs[found_idx].name);
-        } else {
-            setConsoleColor(C_TEXT_ALT);
-            printf("\n   Changes discarded.");
-        }
-        pauseForUser("\n   Press any key to edit another course...");
-    }
-}
-
-void deletePage(Course cs[], int *n) {
-    char key[100], confirm[10];
-
-    while(1) {
-        system("cls");
-        printHeader("Delete Course");
-        displayCourseTable(cs, *n, "");
-        if (*n == 0) {
-            pauseForUser("\n   There are no courses to delete. Press any key to return...");
-            break;
-        }
-
-        setConsoleColor(C_PROMPT);
-        printf("\n   Enter exact Name or Code of the course to delete (or 'back')\n   >> ");
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf(" %[^\n]", key);
-        if (stricmp(key, "back") == 0) break;
-
-        int found_idx = -1;
-        for (int i = 0; i < *n; i++) {
-            if (!stricmp(cs[i].name, key) || !stricmp(cs[i].code, key)) {
-                found_idx = i;
-                break;
-            }
-        }
-
-        if (found_idx == -1) {
-            setConsoleColor(C_WARNING);
-            printf("\n   Warning: Course '%s' not found.", key);
-            pauseForUser("\n   Press any key to try again...");
-            continue;
-        }
-        
-        setConsoleColor(C_WARNING);
-        printf("   Are you sure you want to delete '%s' (%s)? (yes or no): ", cs[found_idx].name, cs[found_idx].code);
-        setConsoleColor(C_TEXT_DEFAULT);
-        scanf("%s", confirm);
-
-        if (stricmp(confirm, "yes") == 0) {
-            char deletedName[100];
-            strcpy(deletedName, cs[found_idx].name);
-
-            for (int j = found_idx; j < *n - 1; j++) {
-                cs[j] = cs[j + 1];
-            }
-            (*n)--;
-            save(cs, *n);
-
-            setConsoleColor(C_SUCCESS);
-            printf("\n   SUCCESS: Course '%s' has been deleted.", deletedName);
-            pauseForUser("\n   Press any key to delete another course...");
-        } else {
-            setConsoleColor(C_TEXT_ALT);
-            printf("\n   Deletion cancelled.");
-            pauseForUser("\n   Press any key to continue...");
-        }
-    }
-}
-
-void displayCourseTable(Course cs[], int n, const char* filter) {
-    setConsoleColor(C_BORDER);
-    printf("\n   %c", 201); for(int i=0; i<86; i++) printf("%c", 205); printf("%c\n", 187);
-    setConsoleColor(C_HEADER);
-    printf("   %c %-30s %c %-8s %c %-5s %c %-20s %c\n", 186, "Course Name", 186, "Code", 186, "Hours", 186, "Instructor", 186);
-    setConsoleColor(C_BORDER);
-    printf("   %c", 204); for(int i=0; i<32; i++) printf("%c", 205); printf("%c", 206); for(int i=0; i<10; i++) printf("%c", 205); printf("%c", 206); for(int i=0; i<7; i++) printf("%c", 205); printf("%c", 206); for(int i=0; i<22; i++) printf("%c", 205); printf("%c\n", 185);
-    
-    int found = 0;
-    char temp_name[100], temp_code[20], temp_filter[100];
-    strcpy(temp_filter, filter);
-    strlwr(temp_filter);
-
-    if (n == 0) {
-         setConsoleColor(C_TEXT_DEFAULT);
-         printf("   %c %-84s %c\n", 186, "No courses in the system yet.", 186);
-         found = 1;
-    } else {
-        for (int i = 0; i < n; i++) {
-            strcpy(temp_name, cs[i].name);
-            strcpy(temp_code, cs[i].code);
-            strlwr(temp_name);
-            strlwr(temp_code);
-
-            if (strlen(filter) == 0 || strstr(temp_name, temp_filter) || strstr(temp_code, temp_filter)) {
-                setConsoleColor(C_TEXT_DEFAULT);
-                printf("   %c %-30s ", 186, cs[i].name);
-                setConsoleColor(C_BORDER); printf("%c", 186);
-                setConsoleColor(C_TEXT_DEFAULT); printf(" %-8s ", cs[i].code);
-                setConsoleColor(C_BORDER); printf("%c", 186);
-                setConsoleColor(C_TEXT_DEFAULT); printf(" %-5d ", cs[i].hours);
-                setConsoleColor(C_BORDER); printf("%c", 186);
-                setConsoleColor(C_TEXT_DEFAULT); printf(" %-20s ", cs[i].teacher);
-                setConsoleColor(C_BORDER); printf("%c\n", 186);
-                found = 1;
-            }
-        }
-    }
-
-    if (!found) {
-        setConsoleColor(C_TEXT_DEFAULT);
-        printf("   %c %-84s %c\n", 186, "No courses found matching criteria.", 186);
-    }
-    setConsoleColor(C_BORDER);
-    printf("   %c", 200); for(int i=0; i<86; i++) printf("%c", 205); printf("%c\n", 188);
-    setConsoleColor(C_TEXT_DEFAULT);
-}
-
-void setConsoleColor(WORD color) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, color);
-}
-
-void showMenu() {
-    char header_title[60];
-    sprintf(header_title, "COURSE MANAGEMENT SYSTEM");
-    
-    setConsoleColor(C_BORDER);
-    printf("\n   %c", 201); for(int i=0; i<52; i++) printf("%c", 205); printf("%c\n", 187);
-    printf("   %c", 186);
-    setConsoleColor(C_HEADER);
-    printf(" %-50s ", header_title);
-    setConsoleColor(C_BORDER);
-    printf("%c\n", 186);
-    printf("   %c", 186);
-    printf(" %-50s ", "Main Menu");
-    printf("%c\n", 186);
-    printf("   %c", 204); for(int i=0; i<52; i++) printf("%c", 205); printf("%c\n", 185);
-
-    setConsoleColor(C_TEXT_DEFAULT);
-    printf("   %c %-50s %c\n", 186, "[1] Show All Courses (with live search)", 186);
-    printf("   %c %-50s %c\n", 186, "[2] Add New Course", 186);
-    printf("   %c %-50s %c\n", 186, "[3] Search for a Course", 186);
-    printf("   %c %-50s %c\n", 186, "[4] Edit a Course", 186);
-    printf("   %c %-50s %c\n", 186, "[5] Delete a Course", 186);
-    printf("   %c %-50s %c\n", 186, "", 186);
-
-    setConsoleColor(C_WARNING);
-    printf("   %c %-50s %c\n", 186, "Type 'exit' to quit the program", 186);
-    setConsoleColor(C_BORDER);
-    printf("   %c", 204); for(int i=0; i<52; i++) printf("%c", 205); printf("%c\n", 185);
-
-    setConsoleColor(C_PROMPT);
-    printf("   %c Please select an option >> ", 186);
-    setConsoleColor(C_TEXT_DEFAULT);
-}
-
-
-void printHeader(const char* title) {
-    char header_title[60];
-    sprintf(header_title, "COURSE MANAGEMENT SYSTEM");
-    
-    setConsoleColor(C_BORDER);
-    printf("\n   %c", 201); for(int i=0; i<52; i++) printf("%c", 205); printf("%c\n", 187);
-    printf("   %c", 186);
-    setConsoleColor(C_HEADER);
-    printf(" %-50s ", header_title);
-    setConsoleColor(C_BORDER);
-    printf("%c\n", 186);
-    printf("   %c", 204); for(int i=0; i<52; i++) printf("%c", 205); printf("%c\n", 185);
-    printf("   %c", 186);
-    setConsoleColor(C_TEXT_DEFAULT);
-    printf(" %-50s ", title);
-    setConsoleColor(C_BORDER);
-    printf("%c\n", 186);
-    printf("   %c", 200); for(int i=0; i<52; i++) printf("%c", 205); printf("%c\n\n", 188);
-    setConsoleColor(C_TEXT_DEFAULT);
-}
-
-void pauseForUser(const char* message) {
-    setConsoleColor(C_TEXT_ALT);
-    printf("%s", message);
-    _getch();
-    setConsoleColor(C_TEXT_DEFAULT);
-}
-
-char* strlwr(char* s) {
-    for (char *p = s; *p; p++) {
-        *p = (char)tolower((unsigned char)*p);
-    }
-    return s;
-}
+// --- CORE LOGIC IMPLEMENTATIONS ---
+// These functions contain the actual logic and are called by both the UI and the tests.
 
 void getCSVPath(char *path, size_t size) {
     char exePath[250];
@@ -452,44 +52,222 @@ void getCSVPath(char *path, size_t size) {
         if (lastBackslash) *lastBackslash = '\0';
         snprintf(path, size, "%s\\courses.csv", exePath);
     } else {
-        printf("Error getting executable path\n");
-        path[0] = '\0';
+        strcpy(path, "courses.csv");
     }
 }
 
-int load(Course cs[]) {
+int load_courses(const char* path_override, Course cs[]) {
     char path[250];
-    getCSVPath(path, sizeof(path));
+    if (path_override) {
+        strcpy(path, path_override);
+    } else {
+        getCSVPath(path, sizeof(path));
+    }
     FILE *fp = fopen(path, "r");
     if (!fp) return 0;
-
-    char line[256];
-    if (!fgets(line, sizeof(line), fp)) {
-        fclose(fp);
-        return 0;
-    }
-
+    char line[256]; fgets(line, sizeof(line), fp);
     int n = 0;
     while (fgets(line, sizeof(line), fp) && n < 100) {
-        if (sscanf(line, "%99[^,],%19[^,],%d,%99[^\n]",
-                   cs[n].name, cs[n].code, &cs[n].hours, cs[n].teacher) == 4) {
-            n++;
-        }
+        if (sscanf(line, "%99[^,],%19[^,],%d,%99[^\n]", cs[n].name, cs[n].code, &cs[n].hours, cs[n].teacher) == 4) n++;
     }
-    fclose(fp);
-    return n;
+    fclose(fp); return n;
 }
 
-void save(Course cs[], int n) {
+void save_courses(const char* path_override, Course cs[], int n) {
     char path[250];
-    getCSVPath(path, sizeof(path));
-    FILE *fp = fopen(path, "w");
-    if (!fp) {
-        printf("Error saving file\n");
-        return;
+    if (path_override) {
+        strcpy(path, path_override);
+    } else {
+        getCSVPath(path, sizeof(path));
     }
+    FILE *fp = fopen(path, "w");
+    if (!fp) return;
     fprintf(fp, "CourseName,CourseCode,Hours,Instructor\n");
-    for (int i = 0; i < n; i++)
-        fprintf(fp, "%s,%s,%d,%s\n", cs[i].name, cs[i].code, cs[i].hours, cs[i].teacher);
+    for (int i = 0; i < n; i++) fprintf(fp, "%s,%s,%d,%s\n", cs[i].name, cs[i].code, cs[i].hours, cs[i].teacher);
     fclose(fp);
 }
+
+int add_course_logic(Course new_course, Course cs[], int n) {
+    if (find_course_by_code(new_course.code, cs, n) != -1) return n;
+    cs[n] = new_course;
+    return n + 1;
+}
+
+int find_course_by_code(const char* code, Course cs[], int n) {
+    char search_code[20]; strcpy(search_code, code); strlwr(search_code);
+    for (int i = 0; i < n; i++) {
+        char temp_code[20]; strcpy(temp_code, cs[i].code); strlwr(temp_code);
+        if (strcmp(temp_code, search_code) == 0) return i;
+    }
+    return -1;
+}
+
+int delete_course_by_index(int index, Course cs[], int n) {
+    if (index < 0 || index >= n) return n;
+    for (int j = index; j < n - 1; j++) cs[j] = cs[j + 1];
+    return n - 1;
+}
+
+
+// --- UI PAGE IMPLEMENTATIONS ---
+// These functions handle user interaction and call the core logic functions.
+
+void showMenu() {
+    printHeader("COURSE MANAGEMENT SYSTEM - Main Menu");
+    printf("   [1] Show All Courses\n   [2] Add New Course\n   [3] Search for a Course\n   [4] Edit a Course\n   [5] Delete a Course\n   [6] Run Tests\n\n");
+    setConsoleColor(C_WARNING); printf("   Type 'exit' to quit the program\n");
+    setConsoleColor(C_PROMPT); printf("\n   Please select an option >> ");
+    setConsoleColor(C_TEXT_DEFAULT);
+}
+
+void showTestPage() {
+    char choice[10];
+    system("cls");
+    printHeader("Testing Menu");
+    printf("   [1] Run Unit Tests\n");
+    printf("   [2] Run End-to-End Test\n\n");
+    setConsoleColor(C_PROMPT);
+    printf("   Please select an option (or 'back') >> ");
+    setConsoleColor(C_TEXT_DEFAULT);
+    scanf("%s", choice);
+    if (strcmp(choice, "1") == 0) {
+        run_unit_tests();
+    } else if (strcmp(choice, "2") == 0) {
+        run_e2e_tests();
+    }
+    pauseForUser("Press any key to return to the main menu...");
+}
+
+void addPage(Course cs[], int *n) {
+    Course new_course;
+    system("cls");
+    printHeader("Add New Course");
+    printf("\n   Enter New Course Name (or 'back')\n   >> ");
+    scanf(" %[^\n]", new_course.name);
+    if (stricmp(new_course.name, "back") == 0) return;
+    printf("   Enter Course Code >> ");
+    scanf("%s", new_course.code);
+    
+    int original_n = *n;
+    *n = add_course_logic(new_course, cs, *n);
+
+    if (*n > original_n) {
+        printf("   Enter Credit Hours >> ");
+        scanf("%d", &cs[*n-1].hours);
+        printf("   Enter Instructor Name >> ");
+        scanf(" %[^\n]", cs[*n-1].teacher);
+        save_courses(NULL, cs, *n);
+        setConsoleColor(C_SUCCESS);
+        printf("\n   SUCCESS: Course '%s' has been added.", new_course.name);
+    } else {
+        setConsoleColor(C_WARNING);
+        printf("\n   Warning: A course with this code already exists.");
+    }
+    pauseForUser("\n   Press any key to continue...");
+}
+
+void deletePage(Course cs[], int *n) {
+    char code[20];
+    system("cls");
+    printHeader("Delete Course");
+    displayCourseTable(cs, *n, "");
+    printf("\n   Enter CODE of course to delete (or 'back')\n   >> ");
+    scanf("%s", code);
+    if (stricmp(code, "back") == 0) return;
+    
+    int idx = find_course_by_code(code, cs, *n);
+
+    if (idx != -1) {
+        char confirm[10];
+        printf("   Are you sure you want to delete '%s'? (yes/no): ", cs[idx].name);
+        scanf("%s", confirm);
+        if (stricmp(confirm, "yes") == 0) {
+            *n = delete_course_by_index(idx, cs, *n);
+            save_courses(NULL, cs, *n);
+            printf("\n   SUCCESS: Course has been deleted.");
+        } else {
+            printf("\n   Deletion cancelled.");
+        }
+    } else {
+        printf("\n   Warning: Course with code '%s' not found.", code);
+    }
+    pauseForUser("\n   Press any key to continue...");
+}
+
+void showAllPage(Course cs[], int n) {
+    system("cls");
+    printHeader("All Courses");
+    displayCourseTable(cs, n, "");
+    pauseForUser("\n   Press any key to return to main menu...");
+}
+
+void searchPage(Course cs[], int n) {
+    char filter[100];
+    system("cls");
+    printHeader("Search Courses");
+    printf("\n   Enter search keyword (or 'back')\n   >> ");
+    scanf("%s", filter);
+    if (stricmp(filter, "back") == 0) return;
+    displayCourseTable(cs, n, filter);
+    pauseForUser("\n   Press any key to return to main menu...");
+}
+
+void updatePage(Course cs[], int n) {
+    char code[20], input[100];
+    system("cls");
+    printHeader("Edit Course Information");
+    displayCourseTable(cs, n, "");
+    printf("\n   Enter CODE of course to edit (or 'back')\n   >> ");
+    scanf("%s", code);
+    if (stricmp(code, "back") == 0) return;
+    int idx = find_course_by_code(code, cs, n);
+    if (idx != -1) {
+        printf("\n   Editing: %s\n", cs[idx].name);
+        printf("   Enter new credit hours (current: %d) or Enter to skip\n   >> ", cs[idx].hours);
+        scanf(" %[^\n]", input);
+        if (strlen(input) > 0 && isdigit(input[0])) cs[idx].hours = atoi(input);
+        printf("   Enter new instructor (current: %s) or Enter to skip\n   >> ", cs[idx].teacher);
+        scanf(" %[^\n]", input);
+        if (strlen(input) > 0) strcpy(cs[idx].teacher, input);
+        save_courses(NULL, cs, n);
+        printf("\n   SUCCESS: Course has been updated.");
+    } else {
+        printf("\n   Warning: Course with code '%s' not found.", code);
+    }
+    pauseForUser("\n   Press any key to continue...");
+}
+
+
+// --- UI HELPER IMPLEMENTATIONS ---
+
+void displayCourseTable(Course cs[], int n, const char* filter) {
+    int count = 0; char temp_name[100], temp_code[20], temp_filter[100];
+    strcpy(temp_filter, filter); strlwr(temp_filter);
+    printf("\n   %-15s %-40s %-10s %-30s\n", "CODE", "COURSE NAME", "HOURS", "INSTRUCTOR");
+    for(int i=0; i<105; i++) printf("-"); printf("\n");
+    if (n == 0) { printf("   No courses found.\n"); }
+    else {
+        for (int i = 0; i < n; i++) {
+            strcpy(temp_name, cs[i].name); strcpy(temp_code, cs[i].code);
+            if (strlen(filter) == 0 || strstr(strlwr(temp_name), temp_filter) || strstr(strlwr(temp_code), temp_filter)) {
+                printf("   %-15s %-40s %-10d %-30s\n", cs[i].code, cs[i].name, cs[i].hours, cs[i].teacher);
+                count++;
+            }
+        }
+        if (count == 0) { printf("   No courses match your search criteria.\n"); }
+    }
+}
+
+void printHeader(const char* title) {
+    printf("=========================================================================================================\n");
+    printf("                                     %s\n", title);
+    printf("=========================================================================================================\n");
+}
+
+void pauseForUser(const char* message) {
+    printf("%s", message);
+    getch();
+}
+
+void setConsoleColor(WORD color) { SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color); }
+char* strlwr(char* s) { for (char *p = s; *p; p++) *p = (char)tolower((unsigned char)*p); return s; }
