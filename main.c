@@ -4,7 +4,7 @@
 
 int main() {
     Course cs[100];
-    int n = load_courses(NULL, cs); // Use load_courses for consistency
+    int n = load_courses(NULL, cs);
     char input[20];
 
     do {
@@ -42,8 +42,7 @@ int main() {
     return 0;
 }
 
-// --- CORE LOGIC IMPLEMENTATIONS ---
-// These functions contain the actual logic and are called by both the UI and the tests.
+
 
 void getCSVPath(char *path, size_t size) {
     char exePath[250];
@@ -109,8 +108,7 @@ int delete_course_by_index(int index, Course cs[], int n) {
 }
 
 
-// --- UI PAGE IMPLEMENTATIONS ---
-// These functions handle user interaction and call the core logic functions.
+
 
 void showMenu() {
     printHeader("COURSE MANAGEMENT SYSTEM - Main Menu");
@@ -238,7 +236,7 @@ void updatePage(Course cs[], int n) {
 }
 
 
-// --- UI HELPER IMPLEMENTATIONS ---
+
 
 void displayCourseTable(Course cs[], int n, const char* filter) {
     int count = 0; char temp_name[100], temp_code[20], temp_filter[100];
@@ -270,4 +268,5 @@ void pauseForUser(const char* message) {
 }
 
 void setConsoleColor(WORD color) { SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color); }
+
 char* strlwr(char* s) { for (char *p = s; *p; p++) *p = (char)tolower((unsigned char)*p); return s; }
