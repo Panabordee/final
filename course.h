@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <conio.h>
 
-// Console Color Definitions
+
 #define C_BORDER 9
 #define C_HEADER 11
 #define C_TEXT_DEFAULT 15
@@ -17,14 +17,13 @@
 #define C_WARNING 14
 #define C_PROMPT 11
 
-// Main Data Structure
+
 typedef struct {
     char code[20], name[100], teacher[100];
     int hours;
 } Course;
 
-// --- CORE LOGIC FUNCTION PROTOTYPES ---
-// These are the functions that the test files will check.
+
 int add_course_logic(Course new_course, Course cs[], int n);
 int find_course_by_code(const char* code, Course cs[], int n);
 int delete_course_by_index(int index, Course cs[], int n);
@@ -32,8 +31,6 @@ void save_courses(const char* path, Course cs[], int n);
 int load_courses(const char* path, Course cs[]);
 void getCSVPath(char *path, size_t size);
 
-// --- UI AND HELPER FUNCTION PROTOTYPES ---
-// These are used by main.c for display purposes.
 void showMenu();
 void showTestPage();
 void showAllPage(Course cs[], int n);
@@ -47,8 +44,9 @@ void printHeader(const char* title);
 void pauseForUser(const char* message);
 char* strlwr(char* s);
 
-// --- TEST FUNCTION PROTOTYPES ---
+
 void run_unit_tests();
 void run_e2e_tests();
 
-#endif // COURSE_H
+
+#endif 
