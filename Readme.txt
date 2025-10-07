@@ -2,39 +2,38 @@ Course Management System (CMS)
 
 โปรเจกต์นี้คือโปรแกรมจัดการรายวิชา (Course Management System) แบบง่ายๆ ทำงานบน Console เขียนด้วยภาษา C
 
-How to Run (วิธีการใช้งาน)
+How to Run 
 
-1. Clone Project (โคลนโปรเจกต์)
+1. Clone Project 
 
 เปิด Terminal แล้วใช้คำสั่งนี้เพื่อคัดลอกโปรเจกต์ลงมาที่เครื่อง
+
+git clone https://github.com/Panabordee/final.git
+cd final
+
+2. Compile 
+
+ ใช้ GCC โดยตรง 
+หากไม่มี make หรือต้องการเห็นคำสั่งแบบเต็มๆ ให้ใช้คำสั่ง gcc นี้ โดยต้องระบุไฟล์ .c ทั้งหมดด้วยตัวเอง:
 Bash
 
-git clone https://github.com/Panabordee/final_CMS.git
-cd final_CMS
+gcc main.c data_management.c ui_pages.c ui_helpers.c unittests.c e2etests.c -o course_manager.exe
 
-2. Compile (คอมไพล์)
+ทั้งสองวิธีจะให้ผลลัพธ์เหมือนกัน คือได้ไฟล์โปรแกรมที่ชื่อ course_manager.exe
 
-ใช้คำสั่ง make เพื่อคอมไพล์โค้ดทั้งหมด
-Bash
-
-make
-
-คำสั่งนี้จะสร้างไฟล์โปรแกรมชื่อ course_manager.exe ขึ้นมา
-
-3. Run (รันโปรแกรม)
-
-รันโปรแกรมด้วยคำสั่งนี้
+3. Run 
+หลังจากคอมไพล์เสร็จ จะมีไฟล์ course_manager.exe โผล่ขึ้นมา สามารถรันโปรแกรมด้วยคำสั่งนี้:
 Bash
 
 ./course_manager.exe
 
 สำคัญ: ต้องมีไฟล์ courses.csv อยู่ในโฟลเดอร์เดียวกันกับ course_manager.exe ด้วยนะ!
 
-Code Logic (ตรรกะของโค้ด)
+Code Logic 
 
 ตรรกะของโปรแกรมนี้แบ่งเป็น 2 ส่วนหลักๆ คือโครงสร้างไฟล์และการไหลของข้อมูล
 
-File Structure (โครงสร้างไฟล์)
+File Structure 
 
 เราแยกโค้ดตามหน้าที่ของมันเพื่อให้จัดการง่าย:
 
@@ -44,7 +43,7 @@ File Structure (โครงสร้างไฟล์)
 
     ไฟล์ .c อื่นๆ: แต่ละไฟล์มีหน้าที่เฉพาะของตัวเอง เช่น data_management.c จัดการการเซฟ/โหลดไฟล์, ui_pages.c จัดการหน้าจอต่างๆ, unittests.c และ e2etests.c ใช้สำหรับทดสอบโปรแกรม
 
-Data Flow (การไหลของข้อมูล)
+Data Flow 
 
 โปรแกรมทำงานกับข้อมูลแบบง่ายๆ คือ:
 
