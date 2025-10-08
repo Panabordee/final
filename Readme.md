@@ -57,8 +57,8 @@
 ### **1. Clone Project**
 #### **เปิด Terminal แล้วใช้คำสั่งนี้เพื่อคัดลอกโปรเจกต์ลงมาที่เครื่อง**
 ```bash
-git clone [https://github.com/Panabordee/final.git](https://github.com/Panabordee/final.git)
-cd final
+git clone https://github.com/Panabordee/final.git
+
 ```
 ### **2. Compile**
 
@@ -100,5 +100,6 @@ Diff
 + 1. อ่านทั้งหมด: ตอนเปิดโปรแกรม มันจะอ่านข้อมูลทั้งหมดจาก courses.csv มาเก็บไว้ใน RAM
   2. แก้ไขในแรม: เวลาเรา เพิ่ม, ลบ, หรือแก้ไขข้อมูล โปรแกรมจะทำกับข้อมูลที่อยู่ใน RAM ก่อน
 - 3. เขียนทับทั้งหมด: เมื่อมีการเปลี่ยนแปลงข้อมูล โปรแกรมจะเอาข้อมูลทั้งหมดที่อยู่ใน RAM ไปเขียนทับไฟล์ courses.csv
+
 
 
