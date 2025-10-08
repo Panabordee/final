@@ -17,7 +17,7 @@ cd final
 หากไม่มี make หรือต้องการเห็นคำสั่งแบบเต็มๆ ให้ใช้คำสั่ง gcc นี้ โดยต้องระบุไฟล์ .c ทั้งหมดด้วยตัวเอง:
 Bash
 
-gcc main.c data_management.c ui_pages.c ui_helpers.c unittests.c e2etests.c -o course_manager.exe
+gcc main.c unittests.c e2etests.c -o course_manager.exe
 
 ทั้งสองวิธีจะให้ผลลัพธ์เหมือนกัน คือได้ไฟล์โปรแกรมที่ชื่อ course_manager.exe
 
@@ -52,4 +52,5 @@ Data Flow
     แก้ไขในแรม: เวลาเรา เพิ่ม, ลบ, หรือแก้ไขข้อมูล โปรแกรมจะทำกับข้อมูลที่อยู่ใน RAM ก่อน
 
     เขียนทับทั้งหมด: เมื่อมีการเปลี่ยนแปลงข้อมูล โปรแกรมจะเอาข้อมูล ทั้งหมด ที่อยู่ใน RAM ไปเขียน ทับ ไฟล์ courses.csv ทั้งไฟล์
+
 
